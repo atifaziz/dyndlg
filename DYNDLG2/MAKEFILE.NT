@@ -1,0 +1,49 @@
+# Nmake macros for building Windows 32-Bit apps
+!include <NtWin32.Mak>
+
+# macro defines
+OBJS=dlgsec.obj dlgcat.obj demodlg.obj
+UOBJS=udlgsec.obj udlgcat.obj udemodlg.obj
+uflags=-DUNICODE -D_UNICODE
+
+# target list for ANSI and Unicode
+all: dyndlg2.exe udyndlg2.exe
+
+# Update the ANSI object files if necessary
+dlgcat.obj: dlgcat.c dlgcat.h debug.h dlgres.h
+    $(cc) $(cdebug) $(cflags) $(cvarsmt) dlgcat.c
+
+dlgsec.obj: dlgsec.c dlgsec.h dlgcat.h dyndlg.h winxext.h debug.h dlgres.h
+    $(cc) $(cdebug) $(cflags) $(cvarsmt) dlgsec.c
+
+demodlg.obj: demodlg.c ids.h dyndlg.h winxext.h dlgcat.h dlgsec.h dlgres.h
+    $(cc) $(cdebug) $(cflags) $(cvarsmt) demodlg.c
+
+# Update the Unicode object files if necessary
+udlgcat.obj: dlgcat.c dlgcat.h debug.h dlgres.h
+    $(cc) $(cdebug) $(uflags) $(cflags) $(cvarsmt) -Foudlgcat.obj dlgcat.c
+
+udlgsec.obj: dlgsec.c dlgsec.h dlgcat.h dyndlg.h winxext.h debug.h dlgres.h
+    $(cc) $(cdebug) $(uflags) $(cflags) $(cvarsmt) -Foudlgsec.obj dlgsec.c
+
+udemodlg.obj: demodlg.c ids.h dyndlg.h winxext.h dlgcat.h dlgsec.h dlgres.h
+    $(cc) $(cdebug) $(uflags) $(cflags) $(cvarsmt) -Foudemodlg.obj demodlg.c
+
+# Update the resource if necessary
+dyndlg.res: dyndlg2.rc ids.h
+    $(rc) $(rcvars) -r -fo dyndlg.res dyndlg2.rc
+    $(cvtres) -$(CPU) dyndlg.res -o dyndlg.rbj
+
+# Update the ANSI Executable file if necessary.
+dyndlg2.exe: $(OBJS) dyndlg2.def dyndlg.res
+    $(link) $(linkdebug) $(guiflags) \
+    -out:dyndlg2.exe                     \
+    $(OBJS) dyndlg.rbj      \
+    $(guilibsmt)
+
+# Update the Unicode Executable file if necessary.
+udyndlg2.exe: $(UOBJS) dyndlg2.def dyndlg.res
+    $(link) $(linkdebug) $(guiflags) \
+    -out:udyndlg2.exe                     \
+    $(UOBJS) dyndlg.rbj      \
+    $(guilibsmt)

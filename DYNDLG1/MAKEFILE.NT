@@ -1,0 +1,43 @@
+# Nmake macros for building Windows 32-Bit apps
+!include <NtWin32.Mak>
+
+# macro defines
+OBJS=demodlg.obj dialogs.obj
+UOBJS=udemodlg.obj udialogs.obj
+uflags=-DUNICODE -D_UNICODE
+
+# target list for ANSI and Unicode
+all: dyndlg1.exe udyndlg1.exe
+
+# Update the ANSI object files if necessary
+dialogs.obj: dialogs.h winxext.h dialogs.c
+    $(cc) $(cdebug) $(cflags) $(cvarsmt) dialogs.c
+
+demodlg.obj: demodlg.c ids.h dialogs.h winxext.h
+    $(cc) $(cdebug) $(cflags) $(cvarsmt) demodlg.c
+
+# Update the ANSI object files if necessary
+udialogs.obj: dialogs.h winxext.h dialogs.c
+    $(cc) $(uflags) $(cdebug) $(cflags) $(cvarsmt) -Foudialogs.obj dialogs.c
+
+udemodlg.obj: demodlg.c ids.h dialogs.h winxext.h
+    $(cc) $(uflags) $(cdebug) $(cflags) $(cvarsmt) -Foudemodlg.obj demodlg.c
+
+# Update the resource if necessary
+dyndlg1.res: dyndlg1.rc ids.h
+    $(rc) $(rcvars) -r -fo dyndlg1.res dyndlg1.rc
+    $(cvtres) -$(CPU) dyndlg1.res -o dyndlg1.rbj
+
+# Update the ANSI Executable file if necessary.
+dyndlg1.exe: $(OBJS) dyndlg1.def dyndlg1.res
+    $(link) $(linkdebug) $(guiflags) \
+    -out:dyndlg1.exe                     \
+    $(OBJS) dyndlg1.rbj      \
+    $(guilibsmt)
+
+# Update the Unicode Executable file if necessary.
+udyndlg1.exe: $(UOBJS) dyndlg1.def dyndlg1.res
+    $(link) $(linkdebug) $(guiflags) \
+    -out:udyndlg1.exe                     \
+    $(UOBJS) dyndlg1.rbj      \
+    $(guilibsmt)
